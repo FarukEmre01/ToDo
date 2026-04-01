@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             
             el.addEventListener('click', (e) => {
-                if(e.target.closest('.del-ws') || e.target.classList.contains('ws-title-input')) return;
+                if(e.target.closest('.del-ws')) return;
                 
                 if(currentWorkspaceId !== ws.id) {
                     playSound('complete');
@@ -857,15 +857,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        boardDOM.addEventListener('dragstart', (e) => {
+        const boardDragHandle = boardDOM.querySelector('.drag-handle');
+        boardDragHandle.addEventListener('dragstart', (e) => {
             if(draggedItemId) {
                 e.preventDefault(); 
                 return;
             }
             draggedBoardId = boardData.id;
+            e.stopPropagation();
+            if (e.dataTransfer.setDragImage) {
+                e.dataTransfer.setDragImage(boardDOM, 0, 0);
+            }
             setTimeout(() => boardDOM.classList.add('dragging-board'), 0);
         });
-        boardDOM.addEventListener('dragend', () => {
+        boardDragHandle.addEventListener('dragend', (e) => {
+            e.stopPropagation();
             boardDOM.classList.remove('dragging-board');
             draggedBoardId = null;
         });
@@ -1046,11 +1052,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            li.querySelector('.expand-btn').addEventListener('click', () => {
+            const expandBtn = li.querySelector('.expand-btn');
+            const toggleDetails = (e) => {
+                if(e) { e.preventDefault(); e.stopPropagation(); }
                 task.isExpanded = !task.isExpanded;
                 li.classList.toggle('expanded');
                 saveWorkspaces();
-            });
+            };
+            expandBtn.addEventListener('click', toggleDetails);
+            expandBtn.addEventListener('touchstart', toggleDetails, {passive: false});
 
             detailsHtml.querySelector('.task-notes').addEventListener('blur', (e) => {
                 task.notes = e.target.value;
