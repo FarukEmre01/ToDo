@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.dataset.id = ws.id;
             
             el.innerHTML = `
-                <span contenteditable="true" spellcheck="false" class="ws-title-input">${escapeHTML(ws.title)}</span>
+                <span class="ws-title-input">${escapeHTML(ws.title)}</span>
                 <div class="workspace-actions">
                     <button class="ws-action-btn del-ws" aria-label="Sil" title="Alanı Sil">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -355,21 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            const titleInput = el.querySelector('.ws-title-input');
-            titleInput.addEventListener('blur', (e) => {
-                const newTitle = e.target.textContent.trim() || 'İsimsiz Alan';
-                if(newTitle !== ws.title) {
-                    ws.title = newTitle;
-                    saveWorkspaces();
-                    if(currentWorkspaceId === ws.id) updateHeaderTitle();
-                }
-            });
-            titleInput.addEventListener('keydown', (e) => {
-                if(e.key === 'Enter') {
-                    e.preventDefault();
-                    titleInput.blur();
-                }
-            });
+            // Removed blur and keydown contenteditable events from titleInput
 
             const delBtn = el.querySelector('.del-ws');
             delBtn.addEventListener('click', (e) => {
@@ -412,6 +398,22 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAllBoards();
         toggleSidebar(false);
     });
+
+    // Workspace Edit Pencik Button
+    const editWorkspaceBtn = document.getElementById('edit-workspace-btn');
+    if (editWorkspaceBtn) {
+        editWorkspaceBtn.addEventListener('click', () => {
+            const ws = getActiveWorkspace();
+            const newName = prompt('Çalışma alanının yeni ismini girin:', ws.title);
+            if(newName && newName.trim() !== '') {
+                ws.title = newName.trim();
+                saveWorkspaces();
+                updateHeaderTitle();
+                renderSidebar();
+                playSound('complete');
+            }
+        });
+    }
 
     // --- Backup System ---
     exportBackupBtn.addEventListener('click', async () => {
@@ -770,6 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
         titleDOM.textContent = boardData.title;
         titleDOM.addEventListener('blur', (e) => {
             updateBoardTitle(boardData.id, e.target.textContent.trim() || 'İsimsiz Sütun');
+            titleDOM.setAttribute('contenteditable', 'false');
         });
         titleDOM.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -777,6 +780,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 titleDOM.blur();
             }
         });
+
+        const editTitleBtn = boardDOM.querySelector('.edit-board-btn');
+        if (editTitleBtn) {
+            editTitleBtn.addEventListener('click', () => {
+                titleDOM.setAttribute('contenteditable', 'true');
+                titleDOM.focus();
+                // Tüm metni otomatik seç
+                const range = document.createRange();
+                range.selectNodeContents(titleDOM);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            });
+        }
 
         // Toggle UI based on Settings
         const filtersContainer = boardDOM.querySelector('.board-filters');
@@ -912,7 +929,7 @@ document.addEventListener('DOMContentLoaded', () => {
             li.className = `todo-item ${isCompletedStatus} ${task.isExpanded ? 'expanded' : ''}`;
             li.dataset.taskId = task.id;
             li.dataset.boardId = boardId;
-            li.draggable = true;
+            li.draggable = false;
 
             if(task.color && task.color !== 'none') {
                 li.setAttribute('data-color', task.color);
@@ -937,10 +954,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             li.innerHTML = `
+                <div class="task-drag-handle" title="Görevi Sürükle" style="cursor: grab; color: var(--text-secondary); opacity: 0.6; display: flex; align-items: center; margin-right: 2px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                </div>
                 <div class="timeline-dot" title="Rengi Değiştir"></div>
                 ${timeHtml}
                 ${checkboxHtml}
-                <span class="todo-text" contenteditable="true" spellcheck="false">${escapeHTML(task.text)}</span>
+                <div class="todo-text-container" style="flex: 1; min-width: 0; display:flex; word-break: break-word; overflow-wrap: anywhere;">
+                    <span class="todo-text" contenteditable="true" spellcheck="false" style="flex: 1; outline: none; border-bottom: 1px dotted transparent; min-width:0;">${escapeHTML(task.text)}</span>
+                </div>
                 
                 <button class="expand-btn ${hasDetails ? 'has-details' : ''}" aria-label="Genişlet" title="Detaylar & Alt Görevler">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1088,26 +1110,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             });
+            // Sürükleme İkonu (Drag Handle) İzolasyonu
+            const dragHandle = li.querySelector('.task-drag-handle');
+            if (dragHandle) {
+                // Drag handle elementini sürüklenebilir yapıp tüm görev kartını kilitle
+                dragHandle.draggable = true;
+                
+                dragHandle.addEventListener('dragstart', (e) => {
+                    draggedItemId = task.id;
+                    draggedSourceBoardId = boardId;
+                    e.stopPropagation(); 
+                    e.dataTransfer.effectAllowed = 'move';
+                    // Sürüklenen şey olarak ikon yerine tüm Kartın hayaletini yarat (opsiyonel ancak UX artırır)
+                    if (e.dataTransfer.setDragImage) {
+                        e.dataTransfer.setDragImage(li, 0, 0);
+                    }
+                    setTimeout(() => wrapper.classList.add('dragging'), 0);
+                });
 
-            li.addEventListener('dragstart', (e) => {
-                if(document.activeElement === textDOM) {
-                    e.preventDefault();
-                    return;
-                }
-                draggedItemId = task.id;
-                draggedSourceBoardId = boardId;
-                e.stopPropagation(); 
-                e.dataTransfer.effectAllowed = 'move';
-                setTimeout(() => wrapper.classList.add('dragging'), 0);
-            });
+                dragHandle.addEventListener('dragend', (e) => {
+                    e.stopPropagation();
+                    wrapper.classList.remove('dragging');
+                    draggedItemId = null;
+                    draggedSourceBoardId = null;
+                    clearDropTargetStyles();
+                });
+            }
 
-            li.addEventListener('dragend', (e) => {
-                e.stopPropagation();
-                wrapper.classList.remove('dragging');
-                draggedItemId = null;
-                draggedSourceBoardId = null;
-                clearDropTargetStyles();
-            });
+            // li.dragstart ve dragend silindi, çünkü sadece dragHandle kullanılıyor
 
             li.addEventListener('dragover', (e) => {
                 e.preventDefault();

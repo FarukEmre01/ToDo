@@ -271,13 +271,20 @@ body {
     border-radius: 8px;
     border: 1px solid transparent;
     transition: all 0.2s ease;
-    cursor: text;
+    cursor: default;
     flex: 1;
 }
 
-.board-title:focus, .board-title:hover {
+.board-title[contenteditable="true"] {
+    cursor: text;
     background-color: rgba(255, 255, 255, 0.05);
     border-color: var(--border-color);
+}
+
+.board-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .delete-board-btn {
@@ -287,10 +294,21 @@ body {
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 8px;
+    opacity: 0.5;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.edit-workspace-btn:hover {
+    color: var(--accent) !important;
+}
+
+.delete-board-btn:hover {
+    opacity: 1;
+    color: var(--danger);
+    background-color: rgba(239, 68, 68, 0.1);
 }
 
 .delete-board-btn:hover {
@@ -1380,13 +1398,31 @@ input:disabled + .slider:before {
         flex-direction: column;
         flex-wrap: nowrap;
         align-items: center; 
-        padding: 1rem 1rem 4rem 1rem;
+        padding: 1rem 0.5rem 4rem 0.5rem; /* Yan boşlukları azalt */
         gap: 2rem;
     }
 
     .board {
         min-width: 100%;
         max-width: 100%;
+        padding: 1rem; /* Panoların iç boşluğunu mobilde daralt */
+    }
+
+    /* Mobilde Todo Item Daralmaları Önlemi */
+    .todo-item {
+        padding: 0.6rem 0.5rem; /* Mobilde kart kenar boşlukları azaltılır */
+        gap: 0.5rem; 
+    }
+
+    .todo-text-container {
+        word-break: break-word !important; 
+        overflow-wrap: break-word !important;
+    }
+
+    .time-block {
+        min-width: 40px; /* Zaman blok genişliğini iyileştir */
+        padding-right: 0.5rem;
+        font-size: 0.85rem;
     }
 
     /* Menüler ve Hover Alanları (Telefonda fare olmadığı için) */
