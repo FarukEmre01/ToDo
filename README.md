@@ -1,21 +1,18 @@
-# 🌌 Premium Kanban Task Planner
+# Kişisel Planlayıcı ve Görev Yöneticisi 📝
 
-An immensely flexible, local-first, glassmorphism-styled task and project management application built entirely with vanilla web technologies (HTML, CSS, JavaScript).
+Merhaba! Bu proje, kendi günlük ve iş/ders planlamalarımı yapabilmek için sıfırdan geliştirdiğim kişisel bir Kanban görev yöneticisi uygulamasıdır. 
 
-## ✨ Features
-* **Modular Workspaces:** Create endless standalone environments (e.g., *Gym, Study, Office*) managed by a sleek sidebar.
-* **Chameleon Settings (V6):** Each workspace runs on its own logic. Toggle features like Time Inputs, Checkboxes, and Progress Bars per-workspace dynamically.
-* **Intelligent Subtasks:** If checkboxes are turned off, subtasks elegantly convert into non-interactive bullet points for taking pure notes!
-* **Physics-Engine Confetti & Synthesizer Sounds:** Built-in Web Audio API synthesizers and custom DOM-physics confetti system that trigger upon task completions. 
-* **100% Offline & Private (V7):** No backend required. Uses a decentralized Local Storage approach with JSON Export/Import capabilities allowing true independence.
-* **Drag and Drop Engine:** Move tasks gracefully between boards with native HTML5 Drag and Drop events.
+Standart yapılacaklar listesi (to-do) uygulamalarının aksine oldukça esnek bir yapıya sahip. İstediğiniz kadar farklı çalışma alanı (Spor, Ders Programı, İş vb.) oluşturabiliyor ve her çalışma alanının kurallarını kendiniz belirleyebiliyorsunuz. Mesela bir listeye sadece düz notlar alırken, diğer listeyi saatli, tikli bir görev takvimi gibi kullanabilirsiniz.
 
-## 🚀 How to Run
-Simply open `index.html` in any modern web browser. 
-No build steps, no package managers, no server required!
+### 🌟 Neler Var?
+- **Karanlık Taraf (Dark Mode & Glassmorphism):** Göz yormayan şık bir tasarım.
+- **Modüler Yapı (Workspaces):** Ortamlar arası geçiş yapma ve panolara kurallar koyabilme (saat ve kutucuk açma/kapama).
+- **Her Şey Kendi Cihazınızda (Local Storage):** Hiçbir veritabanı kullanılmadı. Verilerinizin %100'ü tamamen sizin tarayıcınızda ve kendi güvenliğiniz altında saklanıyor.
+- **Yedekleme (JSON):** "Bilgisayar değiştirirsem her şey gider mi?" derdi yok. Tek tıkla yedeği bir dosya olarak alıp, başka bir yerde saniyeler içinde geri yükleyebilirsiniz.
+- **Ses ve Konfeti:** Tamamlanan görevlerde ufak bir tebrik animasyonu ve sesler! :)
 
-## 💾 Backup & Restore
-You can export all your workspaces at any time into a `.json` file by accessing the **Yedekle (Export Data)** button in the sidebar footer. Easily restore your setups across devices by importing the identical JSON file.
+### 🚀 Nasıl Kullanılır?
+Hiçbir karmaşık sunucu veya kurulum işlemi yok. Sadece dosyaları indirip `index.html` dosyasını tarayıcınızda (Chrome, Edge vb.) açmanız yeterli!
 
----
-*Developed with a focus on maximizing UX & UI without relying on heavy frameworks.*
+*Sade HTML, CSS ve JavaScript (Vanilla JS) kullanılarak yazılmıştır.*
+
