@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çoklu Pano Planlayıcı</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- V5 Sidebar & Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h2>Çalışma Alanları</h2>
+            <button id="close-sidebar-btn" aria-label="Menüyü Kapat">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="sidebar-content" id="workspace-list">
+            <!-- Dynamic workspace items inserted here -->
+        </div>
+        <div class="sidebar-footer">
+            <button id="add-workspace-btn" class="add-workspace-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Yeni Alan Ekle
+            </button>
+            <div class="backup-actions">
+                <button id="export-backup-btn" class="backup-btn" title="Verileri İndir">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Yedekle
+                </button>
+                <label for="import-backup-file" class="backup-btn" title="Yedek Yükle">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Geri Yükle
+                </label>
+                <input type="file" id="import-backup-file" accept=".json" style="display:none">
+            </div>
+        </div>
+    </aside>
+
+    <header class="main-header">
+        <div class="title-container">
+            <button id="menu-btn" class="menu-btn" aria-label="Menüyü Aç">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <div class="title-text">
+                <h1 id="workspace-title-display">Görev Panosu <span class="badge" id="total-task-count">0</span></h1>
+                <p>Günün, haftanın veya projelerin için sonsuz sütunlar oluştur.</p>
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <!-- Search Bar -->
+            <div class="search-container">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="search-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="board-search" placeholder="Pano Arayın..." autocomplete="off">
+            </div>
+
+            <button id="add-board-btn" class="primary-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Yeni Sütun Ekle
+            </button>
+
+            <button id="ws-settings-btn" class="secondary-btn" title="Alan Ayarları">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="board-container" id="board-container">
+        <!-- Boards will be generated here by JavaScript -->
+    </main>
+
+    <!-- Custom Confirm Modal -->
+    <div id="confirm-modal" class="confirm-modal hidden">
+        <div class="confirm-box">
+            <h3 id="confirm-title">Emin misin?</h3>
+            <p id="confirm-message">Bu işlemi geri alamazsın.</p>
+            <div class="confirm-actions">
+                <button id="confirm-cancel" class="board-filter-btn">İptal</button>
+                <button id="confirm-ok" class="primary-btn danger-btn">Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workspace Settings Modal -->
+    <div id="settings-modal" class="confirm-modal hidden">
+        <div class="confirm-box settings-box">
+            <div class="settings-header">
+                <h3>Alan Ayarları</h3>
+                <button id="close-settings-btn" class="close-popup-btn">✕</button>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Saat Girme (Zaman Çizelgesi)</h4>
+                    <p>Görevlere saat eklenebilmesini açar/kapatır.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="setting-time-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Onay Kutucukları</h4>
+                    <p>Görevlerin tik atılabilmesini açar/kapatır.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="setting-check-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>İlerleme Çubuğu (Lazer)</h4>
+                    <p>Panoların altındaki yüzde sayacını gösterir.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="setting-progress-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Color Picker Pop-up -->
+    <div id="color-popup" class="color-popup hidden">
+        <div class="color-grid">
+            <button class="color-btn none" data-color="none" title="Renksiz (İptal)"></button>
+            <button class="color-btn neon-pink" data-color="neon-pink" title="Neon Pembe"></button>
+            <button class="color-btn cyan" data-color="cyan" title="Saf Turkuaz"></button>
+            <button class="color-btn emerald" data-color="emerald" title="Fosforlu Yeşil"></button>
+            <button class="color-btn blue" data-color="blue" title="Elektrik Mavisi"></button>
+            <button class="color-btn purple" data-color="purple" title="Parlak Mor"></button>
+            <button class="color-btn yellow" data-color="yellow" title="Elektrik Sarısı"></button>
+            <button class="color-btn red" data-color="red" title="Keskin Kırmızı"></button>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <template id="board-template">
+        <div class="board" data-id="" draggable="true">
+            <div class="board-header">
+                <!-- Drag Handle Icon -->
+                <div class="drag-handle" title="Panoyu Taşı" draggable="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="12" r="1"></circle>
+                        <circle cx="9" cy="5" r="1"></circle>
+                        <circle cx="9" cy="19" r="1"></circle>
+                        <circle cx="15" cy="12" r="1"></circle>
+                        <circle cx="15" cy="5" r="1"></circle>
+                        <circle cx="15" cy="19" r="1"></circle>
+                    </svg>
+                </div>
+                <h2 class="board-title" contenteditable="true" spellcheck="false" draggable="false">Yeni Sütun</h2>
+                <button class="delete-board-btn" title="Sütunu Sil">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="board-filters">
+                <button class="board-filter-btn active" data-filter="all">Tümü</button>
+                <button class="board-filter-btn" data-filter="pending">Bekleyen</button>
+                <button class="board-filter-btn" data-filter="completed">Biten</button>
+            </div>
+
+            <!-- V4 Progress Bar -->
+            <div class="progress-container" title="Pano İlerlemesi">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%;"></div>
+                </div>
+                <span class="progress-text">0%</span>
+            </div>
+            
+            <form class="task-form">
+                <div class="input-group">
+                    <input type="time" class="todo-time time-picker" required>
+                    <input type="text" class="todo-input" placeholder="Görev..." autocomplete="off" required>
+                    <button type="submit" class="add-task-btn" aria-label="Ekle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+
+            <div class="timeline-container">
+                <div class="timeline-line"></div>
+                <!-- Drag to here -->
+                <ul class="task-list"></ul>
+            </div>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>
