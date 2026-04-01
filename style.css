@@ -1331,3 +1331,94 @@ input:disabled + .slider:before {
     border-left: 4px solid #3b82f6;
 }
 
+/* --- V8 Mobil Cihaz Uyumluluğu (Responsive Redesign) --- */
+@media (max-width: 768px) {
+    /* Genel Yapı ve Başlık */
+    .main-header {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .title-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .title-text h1 {
+        font-size: 1.6rem;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0.5rem;
+    }
+
+    .search-container {
+        width: 100%;
+        order: -1; /* Aramayı en başa al */
+    }
+    
+    #board-search {
+        width: 100%;
+    }
+
+    .primary-btn {
+        flex: 1; /* Yeni sütun ekle butonu esneklik kazansın */
+        justify-content: center;
+        padding: 0.6rem 1rem;
+    }
+
+    .secondary-btn {
+        padding: 0.6rem;
+    }
+
+    /* Panolar - A Seçeneği (Alt Alta Dikey) */
+    .board-container {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: center; 
+        padding: 1rem 1rem 4rem 1rem;
+        gap: 2rem;
+    }
+
+    .board {
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    /* Menüler ve Hover Alanları (Telefonda fare olmadığı için) */
+    .delete-btn,
+    .delete-board-btn,
+    .delete-subtask-btn,
+    .workspace-actions {
+        opacity: 1 !important; 
+    }
+
+    /* Modallar (Settings, Confirm) */
+    .confirm-box,
+    .settings-box {
+        width: 95%;
+        padding: 1.25rem;
+    }
+
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .toggle-switch {
+        align-self: flex-end;
+        margin-top: -30px;
+    }
+
+    /* Sidebar (Yan Menü) */
+    .sidebar {
+        width: 85%;
+        max-width: 320px;
+    }
+}
+
