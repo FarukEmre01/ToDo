@@ -772,7 +772,6 @@ document.addEventListener('DOMContentLoaded', () => {
         titleDOM.textContent = boardData.title;
         titleDOM.addEventListener('blur', (e) => {
             updateBoardTitle(boardData.id, e.target.textContent.trim() || 'İsimsiz Sütun');
-            titleDOM.setAttribute('contenteditable', 'false');
         });
         titleDOM.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
