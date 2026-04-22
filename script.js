@@ -357,8 +357,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const POMO_CIRCUMFERENCE = 2 * Math.PI * 100;
 
     function getPomoDuration() {
-        if(pomoMode === 'work') return parseInt(pomoWorkDurSelect.value) * 60;
-        return parseInt(pomoBreakDurSelect.value) * 60;
+        if(pomoMode === 'work') return (parseInt(pomoWorkDurSelect.value) || 25) * 60;
+        return (parseInt(pomoBreakDurSelect.value) || 5) * 60;
+    }
+
+    function pomoStartTimer() {
+        if(pomoIsRunning) return;
+        pomoIsRunning = true;
+        updateStartBtnIcon(true);
+        pomoTimeOut = setInterval(() => {
+            pomoTimeRemaining--;
+            updatePomoDisplay();
+            
+            if(pomoTimeRemaining <= 0) {
+                clearInterval(pomoTimeOut);
+                pomoIsRunning = false;
+                updateStartBtnIcon(false);
+                
+                // Play completion sound 5 times
+                if(pomoSoundToggle.checked) {
+                    for(let i = 0; i < 5; i++) {
+                        setTimeout(() => playSound('party'), i * 400);
+                    }
+                }
+                showToast(pomoMode === 'work' ? 'Odaklanma bitti! Mola zamanı ☕' : 'Mola bitti! Odaklanma zamanı 🎯', 'success');
+                
+                pomoNextMode(true); // true = autoStart
+            }
+        }, 1000);
     }
 
     function formatTime(seconds) {
@@ -440,28 +466,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateStartBtnIcon(false);
             } else {
                 playSound('complete');
-                pomoIsRunning = true;
-                updateStartBtnIcon(true);
-                pomoTimeOut = setInterval(() => {
-                    pomoTimeRemaining--;
-                    updatePomoDisplay();
-                    
-                    if(pomoTimeRemaining <= 0) {
-                        clearInterval(pomoTimeOut);
-                        pomoIsRunning = false;
-                        updateStartBtnIcon(false);
-                        
-                        if(pomoSoundToggle.checked) playSound('party');
-                        showToast('Zaman doldu!', 'success');
-                        
-                        pomoNextMode();
-                    }
-                }, 1000);
+                pomoStartTimer();
             }
         });
     }
 
-    function pomoNextMode() {
+    function pomoNextMode(autoStart) {
         if(pomoMode === 'work') {
             pomoCompletedRounds++;
             renderPomoDots();
@@ -475,6 +485,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         pomoTimeRemaining = getPomoDuration();
         updatePomoDisplay();
+        
+        // Auto-start the next timer after a brief delay for sound to finish
+        if(autoStart) {
+            setTimeout(() => pomoStartTimer(), 2500);
+        }
     }
 
     if(pomoSkipBtn) {
@@ -516,8 +531,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.querySelector('.pomo-mode-btn[data-mode="work"]').classList.add('active');
 
                     // Reset settings to defaults
-                    pomoWorkDurSelect.value = '25';
-                    pomoBreakDurSelect.value = '5';
+                    pomoWorkDurSelect.value = 25;
+                    pomoBreakDurSelect.value = 5;
                     pomoTargetInput.value = '4';
                     pomoSoundToggle.checked = true;
 
@@ -532,13 +547,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Quick Settings Listeners
     pomoTargetInput.addEventListener('change', renderPomoDots);
-    pomoWorkDurSelect.addEventListener('change', () => {
+    pomoWorkDurSelect.addEventListener('input', () => {
         if(!pomoIsRunning && pomoMode === 'work') {
             pomoTimeRemaining = getPomoDuration();
             updatePomoDisplay();
         }
     });
-    pomoBreakDurSelect.addEventListener('change', () => {
+    pomoBreakDurSelect.addEventListener('input', () => {
         if(!pomoIsRunning && pomoMode === 'break') {
             pomoTimeRemaining = getPomoDuration();
             updatePomoDisplay();

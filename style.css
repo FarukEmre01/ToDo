@@ -1688,7 +1688,7 @@ input:disabled + .slider:before {
     color: var(--text-primary);
 }
 
-.pomo-setting-row select, .pomo-setting-row input[type="number"] {
+.pomo-setting-row input[type="number"] {
     background: rgba(0,0,0,0.2);
     border: 1px solid rgba(255,255,255,0.1);
     color: var(--text-primary);
@@ -1696,10 +1696,28 @@ input:disabled + .slider:before {
     border-radius: 6px;
     outline: none;
     font-size: 0.85rem;
+    width: 60px;
 }
 
-.pomo-setting-row input[type="number"] {
-    width: 60px;
+.pomo-setting-row input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.pomo-duration-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.pomo-duration-input {
+    width: 55px !important;
+    text-align: center;
+}
+
+.pomo-duration-unit {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
 }
 
 /* Mobile Adjustments for Right Sidebar */

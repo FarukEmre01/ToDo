@@ -187,23 +187,17 @@
                 <h4 class="settings-title">Hızlı Ayarlar</h4>
                 <div class="pomo-setting-row">
                     <label>Odak Süresi</label>
-                    <select id="pomo-work-duration">
-                        <option value="15">15 dk</option>
-                        <option value="20">20 dk</option>
-                        <option value="25" selected>25 dk</option>
-                        <option value="30">30 dk</option>
-                        <option value="45">45 dk</option>
-                        <option value="60">60 dk</option>
-                    </select>
+                    <div class="pomo-duration-input-wrap">
+                        <input type="number" id="pomo-work-duration" value="25" min="1" max="120" class="pomo-duration-input"> 
+                        <span class="pomo-duration-unit">dk</span>
+                    </div>
                 </div>
                 <div class="pomo-setting-row">
                     <label>Mola Süresi</label>
-                    <select id="pomo-break-duration">
-                        <option value="5" selected>5 dk</option>
-                        <option value="10">10 dk</option>
-                        <option value="15">15 dk</option>
-                        <option value="20">20 dk</option>
-                    </select>
+                    <div class="pomo-duration-input-wrap">
+                        <input type="number" id="pomo-break-duration" value="5" min="1" max="60" class="pomo-duration-input">
+                        <span class="pomo-duration-unit">dk</span>
+                    </div>
                 </div>
                 <div class="pomo-setting-row">
                     <label>Hedef Tur</label>
