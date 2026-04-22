@@ -74,31 +74,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 5 saniyelik klasik bip-bip alarm dizisi
-    let pomoAlarmTimer = null;
+    // 5 saniyelik klasik bip-bip alarm — tek oscillator, temiz zamanlama
+    let pomoAlarmOsc = null;
+    let pomoAlarmGain = null;
+
     function playPomoAlarm() {
         stopPomoAlarm();
-        let elapsed = 0;
-        const interval = 500; // Her 500ms'de bir çift bip
-        function doBip() {
-            playSound('beep');
-            setTimeout(() => playSound('beep'), 150); // çift bip
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.type = 'sine';
+        osc.frequency.value = 1000; // Klasik 1kHz bip
+
+        // Başlangıçta sessiz
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+
+        // 5 saniye boyunca bip-bip deseni: 
+        // Her 700ms'de bir çift bip (100ms bip, 100ms sessiz, 100ms bip, 400ms sessiz)
+        const t = audioCtx.currentTime;
+        const duration = 5; // toplam 5 saniye
+        const cycleLength = 0.7; // her döngü 700ms
+        const cycles = Math.floor(duration / cycleLength);
+
+        for(let i = 0; i < cycles; i++) {
+            const start = t + (i * cycleLength);
+            // İlk bip
+            gain.gain.setValueAtTime(0.3, start);
+            gain.gain.setValueAtTime(0, start + 0.1);
+            // İkinci bip
+            gain.gain.setValueAtTime(0.3, start + 0.2);
+            gain.gain.setValueAtTime(0, start + 0.3);
         }
-        doBip(); // ilk bip hemen
-        pomoAlarmTimer = setInterval(() => {
-            elapsed += interval;
-            if(elapsed >= 5000) {
-                stopPomoAlarm();
-                return;
-            }
-            doBip();
-        }, interval);
+
+        osc.start(t);
+        osc.stop(t + duration);
+
+        pomoAlarmOsc = osc;
+        pomoAlarmGain = gain;
+
+        // Temizlik
+        osc.onended = () => {
+            pomoAlarmOsc = null;
+            pomoAlarmGain = null;
+        };
     }
 
     function stopPomoAlarm() {
-        if(pomoAlarmTimer) {
-            clearInterval(pomoAlarmTimer);
-            pomoAlarmTimer = null;
+        if(pomoAlarmOsc) {
+            try { pomoAlarmOsc.stop(); } catch(e) {}
+            pomoAlarmOsc = null;
+            pomoAlarmGain = null;
         }
     }
 
