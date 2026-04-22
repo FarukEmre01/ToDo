@@ -42,6 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
             osc.start(audioCtx.currentTime);
             osc.stop(audioCtx.currentTime + 0.4);
+        } else if(type === 'alarm') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+            osc.frequency.setValueAtTime(0, audioCtx.currentTime + 0.1); 
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.2);
+            osc.frequency.setValueAtTime(0, audioCtx.currentTime + 0.3);
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.4);
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.5);
         } else if(type === 'whoosh') {
             osc.type = 'sine';
             osc.frequency.setValueAtTime(200, audioCtx.currentTime);
@@ -201,7 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ensure V6 Settings existence in all Workspaces
     workspaces.forEach(ws => {
         if(!ws.settings) {
-            ws.settings = { showTime: true, showCheckboxes: true, showProgressBar: true };
+            ws.settings = { showTime: true, showCheckboxes: true, showProgressBar: true, alarmEnabled: false, alarmOffset: 5, snoozeDuration: 5 };
+        } else {
+            if (ws.settings.alarmEnabled === undefined) ws.settings.alarmEnabled = false;
+            if (ws.settings.alarmOffset === undefined) ws.settings.alarmOffset = 5;
+            if (ws.settings.snoozeDuration === undefined) ws.settings.snoozeDuration = 5;
         }
         ws.boards.forEach(b => {
             if(!b.filterMode) b.filterMode = 'all';
@@ -209,6 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(task.notes === undefined) task.notes = '';
                 if(task.subtasks === undefined) task.subtasks = [];
                 if(task.isExpanded === undefined) task.isExpanded = false;
+                if(task.alarmTriggered === undefined) task.alarmTriggered = false;
             });
         });
     });
@@ -225,6 +241,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- DOM Elements ---
+    const pomodoroSidebar = document.getElementById('pomodoro-sidebar');
+    const closePomodoroBtn = document.getElementById('close-pomodoro-btn');
+    const pomoToggleBtn = document.getElementById('pomo-toggle-btn');
+    const pomoTimerDisplay = document.getElementById('pomo-timer-display');
+    const pomoRingProgress = document.getElementById('pomo-ring-progress');
+    const pomoStartBtn = document.getElementById('pomo-start-btn');
+    const pomoResetBtn = document.getElementById('pomo-reset-btn');
+    const pomoSkipBtn = document.getElementById('pomo-skip-btn');
+    const pomoModeBtns = document.querySelectorAll('.pomo-mode-btn');
+
+    // Quick Settings Elements
+    const pomoWorkDurSelect = document.getElementById('pomo-work-duration');
+    const pomoBreakDurSelect = document.getElementById('pomo-break-duration');
+    const pomoTargetInput = document.getElementById('pomo-target-rounds');
+    const pomoSoundToggle = document.getElementById('pomo-sound-toggle');
+    const pomoDotsContainer = document.getElementById('pomo-dots-container');
+    const pomoRoundText = document.getElementById('pomo-round-text');
+    const pomoStatusIcon = document.getElementById('pomo-status-icon');
+    const pomoTimerLabel = document.getElementById('pomo-timer-label');
+
     const boardContainer = document.getElementById('board-container');
     const boardTemplate = document.getElementById('board-template');
     const addBoardBtn = document.getElementById('add-board-btn');
@@ -248,6 +284,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingTimeToggle = document.getElementById('setting-time-toggle');
     const settingCheckToggle = document.getElementById('setting-check-toggle');
     const settingProgressToggle = document.getElementById('setting-progress-toggle');
+    const settingAlarmToggle = document.getElementById('setting-alarm-toggle');
+    const settingAlarmOptions = document.getElementById('setting-alarm-options');
+    const settingAlarmOffset = document.getElementById('setting-alarm-offset');
+    const settingSnoozeDuration = document.getElementById('setting-snooze-duration');
 
     // Popup Elements
     const colorPopup = document.getElementById('color-popup');
@@ -259,6 +299,256 @@ document.addEventListener('DOMContentLoaded', () => {
     let draggedSourceBoardId = null; 
     let draggedBoardId = null; 
 
+    // --- Workspace Aktiflik Güncelleme ---
+    function showView(view) {
+        document.querySelectorAll('.sidebar-nav-item, .workspace-item').forEach(el => el.classList.remove('active'));
+        const ws = getActiveWorkspace();
+        const activeWsEl = document.querySelector(`.workspace-item[data-id="${ws.id}"]`);
+        if(activeWsEl) activeWsEl.classList.add('active');
+        updateTotalCount();
+    }
+
+    function togglePomodoroSidebar(show) {
+        if(show === undefined) {
+            pomodoroSidebar.classList.toggle('hidden');
+        } else {
+            if(show) pomodoroSidebar.classList.remove('hidden');
+            else pomodoroSidebar.classList.add('hidden');
+        }
+        
+        if(!pomodoroSidebar.classList.contains('hidden')) {
+            toggleSidebar(false); // Close left sidebar if right opens
+        }
+    }
+
+    if(pomoToggleBtn) {
+        pomoToggleBtn.addEventListener('click', () => {
+            playSound('whoosh');
+            togglePomodoroSidebar();
+        });
+    }
+
+    if(closePomodoroBtn) {
+        closePomodoroBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playSound('whoosh');
+            togglePomodoroSidebar(false);
+        });
+    }
+
+    // BLOCK CLICK PROPAGATION to prevent background button triggers
+    if(pomodoroSidebar) {
+        pomodoroSidebar.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        pomodoroSidebar.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    // --- Pomodoro Timer Engine ---
+    let pomoMode = 'work'; 
+    let pomoTimeOut = null;
+    let pomoIsRunning = false;
+    let pomoTimeRemaining = 25 * 60; 
+    let pomoCompletedRounds = 0;
+    let pomoTargetRounds = 4;
+
+    const POMO_CIRCUMFERENCE = 2 * Math.PI * 100;
+
+    function getPomoDuration() {
+        if(pomoMode === 'work') return parseInt(pomoWorkDurSelect.value) * 60;
+        return parseInt(pomoBreakDurSelect.value) * 60;
+    }
+
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function renderPomoDots() {
+        if(!pomoDotsContainer) return;
+        pomoDotsContainer.innerHTML = '';
+        pomoTargetRounds = parseInt(pomoTargetInput.value) || 4;
+        
+        for(let i = 0; i < pomoTargetRounds; i++) {
+            const dot = document.createElement('div');
+            dot.className = `pomo-dot ${i < pomoCompletedRounds ? 'completed' : ''}`;
+            pomoDotsContainer.appendChild(dot);
+        }
+        if(pomoRoundText) {
+            pomoRoundText.textContent = `${pomoCompletedRounds} / ${pomoTargetRounds}`;
+        }
+    }
+
+    function updatePomoDisplay() {
+        if(pomoTimerDisplay) {
+            pomoTimerDisplay.textContent = formatTime(pomoTimeRemaining);
+        }
+        if(pomoRingProgress) {
+            const total = getPomoDuration();
+            const dashoffset = POMO_CIRCUMFERENCE * (1 - (pomoTimeRemaining / total));
+            pomoRingProgress.style.strokeDashoffset = dashoffset;
+        }
+        if(pomoIsRunning) {
+            document.title = `${pomoMode === 'work' ? '🎯' : '☕'} ${formatTime(pomoTimeRemaining)}`;
+        } else {
+            document.title = "Görev Listem";
+        }
+        
+        // Update Labels
+        if(pomoMode === 'work') {
+            pomoStatusIcon.textContent = '🎯';
+            pomoTimerLabel.textContent = 'Odaklanma zamanı';
+        } else {
+            pomoStatusIcon.textContent = '☕';
+            pomoTimerLabel.textContent = 'Dinlenme zamanı';
+        }
+    }
+
+    pomoModeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            playSound('whoosh');
+            pomoModeBtns.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            pomoMode = e.target.dataset.mode;
+            pomoIsRunning = false;
+            clearInterval(pomoTimeOut);
+            updateStartBtnIcon(false);
+            pomoTimeRemaining = getPomoDuration();
+            updatePomoDisplay();
+        });
+    });
+
+    function updateStartBtnIcon(running) {
+        if(!pomoStartBtn) return;
+        if(running) {
+            pomoStartBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
+            pomoStartBtn.classList.add('active');
+        } else {
+            pomoStartBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+            pomoStartBtn.classList.remove('active');
+        }
+    }
+
+    if(pomoStartBtn) {
+        pomoStartBtn.addEventListener('click', () => {
+            if (pomoIsRunning) {
+                pomoIsRunning = false;
+                clearInterval(pomoTimeOut);
+                updateStartBtnIcon(false);
+            } else {
+                playSound('complete');
+                pomoIsRunning = true;
+                updateStartBtnIcon(true);
+                pomoTimeOut = setInterval(() => {
+                    pomoTimeRemaining--;
+                    updatePomoDisplay();
+                    
+                    if(pomoTimeRemaining <= 0) {
+                        clearInterval(pomoTimeOut);
+                        pomoIsRunning = false;
+                        updateStartBtnIcon(false);
+                        
+                        if(pomoSoundToggle.checked) playSound('party');
+                        showToast('Zaman doldu!', 'success');
+                        
+                        pomoNextMode();
+                    }
+                }, 1000);
+            }
+        });
+    }
+
+    function pomoNextMode() {
+        if(pomoMode === 'work') {
+            pomoCompletedRounds++;
+            renderPomoDots();
+            pomoMode = 'break';
+            pomoModeBtns.forEach(b => b.classList.remove('active'));
+            document.querySelector('.pomo-mode-btn[data-mode="break"]').classList.add('active');
+        } else {
+            pomoMode = 'work';
+            pomoModeBtns.forEach(b => b.classList.remove('active'));
+            document.querySelector('.pomo-mode-btn[data-mode="work"]').classList.add('active');
+        }
+        pomoTimeRemaining = getPomoDuration();
+        updatePomoDisplay();
+    }
+
+    if(pomoSkipBtn) {
+        pomoSkipBtn.addEventListener('click', () => {
+            playSound('whoosh');
+            clearInterval(pomoTimeOut);
+            pomoIsRunning = false;
+            updateStartBtnIcon(false);
+            pomoNextMode();
+        });
+    }
+
+    if(pomoResetBtn) {
+        pomoResetBtn.addEventListener('click', () => {
+            playSound('uncomplete');
+            pomoIsRunning = false;
+            clearInterval(pomoTimeOut);
+            updateStartBtnIcon(false);
+            pomoTimeRemaining = getPomoDuration();
+            updatePomoDisplay();
+        });
+    }
+
+    // Full Reset Button (header) — resets everything: timer, rounds, and settings
+    const pomoFullResetBtn = document.getElementById('pomo-full-reset-btn');
+    if(pomoFullResetBtn) {
+        pomoFullResetBtn.addEventListener('click', () => {
+            showConfirm(
+                'Pomodoro Sıfırla',
+                'Sayaç, ilerleme ve ayarlar tamamen sıfırlansın mı?',
+                () => {
+                    playSound('uncomplete');
+                    pomoIsRunning = false;
+                    clearInterval(pomoTimeOut);
+                    updateStartBtnIcon(false);
+                    pomoCompletedRounds = 0;
+                    pomoMode = 'work';
+                    pomoModeBtns.forEach(b => b.classList.remove('active'));
+                    document.querySelector('.pomo-mode-btn[data-mode="work"]').classList.add('active');
+
+                    // Reset settings to defaults
+                    pomoWorkDurSelect.value = '25';
+                    pomoBreakDurSelect.value = '5';
+                    pomoTargetInput.value = '4';
+                    pomoSoundToggle.checked = true;
+
+                    pomoTimeRemaining = getPomoDuration();
+                    updatePomoDisplay();
+                    renderPomoDots();
+                    showToast('Pomodoro sıfırlandı!', 'success');
+                }
+            );
+        });
+    }
+
+    // Quick Settings Listeners
+    pomoTargetInput.addEventListener('change', renderPomoDots);
+    pomoWorkDurSelect.addEventListener('change', () => {
+        if(!pomoIsRunning && pomoMode === 'work') {
+            pomoTimeRemaining = getPomoDuration();
+            updatePomoDisplay();
+        }
+    });
+    pomoBreakDurSelect.addEventListener('change', () => {
+        if(!pomoIsRunning && pomoMode === 'break') {
+            pomoTimeRemaining = getPomoDuration();
+            updatePomoDisplay();
+        }
+    });
+
+    // Initialize
+    updatePomoDisplay();
+    renderPomoDots();
+
     // --- Settings Modal Logic ---
     function syncSettingsUI() {
         if (!settingCheckToggle.checked) {
@@ -269,6 +559,11 @@ document.addEventListener('DOMContentLoaded', () => {
             settingProgressToggle.disabled = false;
             settingProgressToggle.closest('.setting-item').classList.remove('disabled-item');
         }
+        if (settingAlarmToggle.checked) {
+            settingAlarmOptions.style.display = 'flex';
+        } else {
+            settingAlarmOptions.style.display = 'none';
+        }
     }
 
     wsSettingsBtn.addEventListener('click', () => {
@@ -276,6 +571,9 @@ document.addEventListener('DOMContentLoaded', () => {
         settingTimeToggle.checked = ws.settings.showTime;
         settingCheckToggle.checked = ws.settings.showCheckboxes;
         settingProgressToggle.checked = ws.settings.showProgressBar;
+        settingAlarmToggle.checked = ws.settings.alarmEnabled;
+        settingAlarmOffset.value = ws.settings.alarmOffset;
+        settingSnoozeDuration.value = ws.settings.snoozeDuration;
         syncSettingsUI();
         settingsModal.classList.remove('hidden');
     });
@@ -285,14 +583,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function handleSettingsChange(e) {
-        if(e.target === settingCheckToggle) {
+        if(e.target === settingCheckToggle || e.target === settingAlarmToggle) {
             syncSettingsUI();
+            if(e.target === settingAlarmToggle && settingAlarmToggle.checked) {
+                if (window.Notification && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+                    Notification.requestPermission();
+                }
+            }
         }
         
         const ws = getActiveWorkspace();
         ws.settings.showTime = settingTimeToggle.checked;
         ws.settings.showCheckboxes = settingCheckToggle.checked;
         ws.settings.showProgressBar = settingProgressToggle.checked;
+        ws.settings.alarmEnabled = settingAlarmToggle.checked;
+        ws.settings.alarmOffset = parseInt(settingAlarmOffset.value) || 0;
+        ws.settings.snoozeDuration = parseInt(settingSnoozeDuration.value) || 5;
         saveWorkspaces();
         renderAllBoards();
     }
@@ -300,6 +606,9 @@ document.addEventListener('DOMContentLoaded', () => {
     settingTimeToggle.addEventListener('change', handleSettingsChange);
     settingCheckToggle.addEventListener('change', handleSettingsChange);
     settingProgressToggle.addEventListener('change', handleSettingsChange);
+    settingAlarmToggle.addEventListener('change', handleSettingsChange);
+    settingAlarmOffset.addEventListener('input', handleSettingsChange);
+    settingSnoozeDuration.addEventListener('input', handleSettingsChange);
 
     // --- Sidebar System Interface ---
     function toggleSidebar(force) {
@@ -346,6 +655,8 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('click', (e) => {
                 if(e.target.closest('.del-ws')) return;
                 
+                showView('kanban');
+                
                 if(currentWorkspaceId !== ws.id) {
                     playSound('complete');
                     currentWorkspaceId = ws.id;
@@ -361,13 +672,13 @@ document.addEventListener('DOMContentLoaded', () => {
             delBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if(workspaces.length === 1) {
-                    alert('En az 1 çalışma alanı bulunmalıdır!');
+                    alert('En az 1 proje bulunmalıdır!');
                     return;
                 }
 
                 showConfirm(
                     `${ws.title} Silinecek`,
-                    'Bu çalışma alanını ve içindeki tüm görevleri tamamen silmek istediğine emin misin?',
+                    'Bu projeyi ve içindeki tüm görevleri tamamen silmek istediğine emin misin?',
                     () => {
                         playSound('uncomplete');
                         workspaces = workspaces.filter(w => w.id !== ws.id);
@@ -388,8 +699,8 @@ document.addEventListener('DOMContentLoaded', () => {
         playSound('complete');
         const newWs = {
             id: `ws_${Date.now()}`,
-            title: 'Yeni Çalışma Alanı',
-            settings: { showTime: true, showCheckboxes: true, showProgressBar: true },
+            title: 'Yeni Proje',
+            settings: { showTime: true, showCheckboxes: true, showProgressBar: true, alarmEnabled: false, alarmOffset: 5, snoozeDuration: 5 },
             boards: []
         };
         workspaces.push(newWs);
@@ -404,7 +715,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editWorkspaceBtn) {
         editWorkspaceBtn.addEventListener('click', () => {
             const ws = getActiveWorkspace();
-            const newName = prompt('Çalışma alanının yeni ismini girin:', ws.title);
+            const newName = prompt('Projenin yeni ismini girin:', ws.title);
             if(newName && newName.trim() !== '') {
                 ws.title = newName.trim();
                 saveWorkspaces();
@@ -536,8 +847,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function deleteBoard(id) {
         showConfirm(
-            'Panoyu Sil', 
-            'Panoyu ve içindeki tüm görevleri silmek istediğine emin misin? Bu işlem geri alınamaz!',
+            'Listeyi Sil', 
+            'Listeyi ve içindeki tüm görevleri silmek istediğine emin misin? Bu işlem geri alınamaz!',
             () => {
                 playSound('uncomplete');
                 const ws = getActiveWorkspace();
@@ -553,7 +864,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const ws = getActiveWorkspace();
         const newBoard = {
             id: `b_${Date.now()}`,
-            title: 'Yeni Sütun',
+            title: 'Yeni Liste',
             filterMode: 'all',
             tasks: []
         };
@@ -1223,6 +1534,115 @@ document.addEventListener('DOMContentLoaded', () => {
             reRenderBoardTasks(targetBoardId);
         }
     }
+
+    // --- Alarm Ticker & Modal Actions ---
+    const alarmModal = document.getElementById('alarm-modal');
+    const alarmTaskName = document.getElementById('alarm-task-name');
+    const alarmTaskTime = document.getElementById('alarm-task-time');
+    const alarmCompleteBtn = document.getElementById('alarm-complete-btn');
+    const alarmSnoozeBtn = document.getElementById('alarm-snooze-btn');
+    const alarmSnoozeMins = document.getElementById('alarm-snooze-mins');
+    
+    let activeAlarmTask = null;
+    let activeAlarmBoardId = null;
+    let alarmRepeatInterval = null;
+    let alarmTimeout = null;
+
+    function stopAlarmSound() {
+        if (alarmRepeatInterval) clearInterval(alarmRepeatInterval);
+        if (alarmTimeout) clearTimeout(alarmTimeout);
+        alarmRepeatInterval = null;
+        alarmTimeout = null;
+    }
+
+    function triggerAlarm(boardId, task) {
+        stopAlarmSound();
+        
+        playSound('alarm');
+        alarmRepeatInterval = setInterval(() => {
+            playSound('alarm');
+        }, 2000);
+
+        alarmTimeout = setTimeout(() => {
+            stopAlarmSound();
+            if(alarmModal) alarmModal.classList.add('hidden');
+            activeAlarmTask = null;
+        }, 60000);
+        
+        if (window.Notification && Notification.permission === 'granted') {
+            const notif = new Notification('Zamanı Geldi!', {
+                body: `${task.text} (${task.time})`
+            });
+            notif.onclick = () => window.focus();
+        }
+
+        activeAlarmTask = task;
+        activeAlarmBoardId = boardId;
+        
+        if(alarmTaskName) alarmTaskName.textContent = task.text;
+        if(alarmTaskTime) alarmTaskTime.textContent = task.time;
+        if(alarmSnoozeMins) alarmSnoozeMins.textContent = getActiveWorkspace().settings.snoozeDuration;
+        
+        if(alarmModal) alarmModal.classList.remove('hidden');
+    }
+
+    if (alarmCompleteBtn) {
+        alarmCompleteBtn.addEventListener('click', () => {
+             stopAlarmSound();
+             alarmModal.classList.add('hidden');
+             activeAlarmTask = null;
+        });
+    }
+
+    if (alarmSnoozeBtn) {
+        alarmSnoozeBtn.addEventListener('click', () => {
+             stopAlarmSound();
+             if (activeAlarmTask) {
+                  if (activeAlarmTask.time) {
+                      const [h, m] = activeAlarmTask.time.split(':').map(Number);
+                      let newTime = new Date();
+                      newTime.setHours(h);
+                      newTime.setMinutes(m + getActiveWorkspace().settings.snoozeDuration);
+                      const s_h = newTime.getHours().toString().padStart(2, '0');
+                      const s_m = newTime.getMinutes().toString().padStart(2, '0');
+                      activeAlarmTask.time = `${s_h}:${s_m}`;
+                      activeAlarmTask.alarmTriggered = false;
+                      saveWorkspaces();
+                      reRenderBoardTasks(activeAlarmBoardId);
+                  }
+             }
+             alarmModal.classList.add('hidden');
+             activeAlarmTask = null;
+        });
+    }
+
+    // Alarm Checker (runs every 10 seconds)
+    setInterval(() => {
+        const ws = getActiveWorkspace();
+        if (!ws || !ws.settings || !ws.settings.alarmEnabled) return;
+
+        const offset = ws.settings.alarmOffset || 0;
+        const now = new Date();
+        const currentTotalMins = now.getHours() * 60 + now.getMinutes();
+
+        ws.boards.forEach(board => {
+            board.tasks.forEach(task => {
+                if (!task.completed && !task.alarmTriggered && task.time) {
+                    const [th, tm] = task.time.split(':').map(Number);
+                    if (!isNaN(th) && !isNaN(tm)) {
+                        const taskTotalMins = th * 60 + tm;
+                        // If the task time is within the offset constraint, OR it has just passed very recently (e.g., negative up to -2 min)
+                        const diff = taskTotalMins - currentTotalMins;
+                        if (diff <= offset && diff >= -1) {
+                            task.alarmTriggered = true;
+                            saveWorkspaces();
+                            triggerAlarm(board.id, task);
+                        }
+                    }
+                }
+            });
+        });
+    }, 10000);
 
     function escapeHTML(str) {
         if(typeof str !== 'string') return '';

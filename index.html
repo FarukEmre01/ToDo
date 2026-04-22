@@ -14,42 +14,52 @@
     <!-- V5 Sidebar & Overlay -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <aside id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <h2>Çalışma Alanları</h2>
-            <button id="close-sidebar-btn" aria-label="Menüyü Kapat">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-        </div>
-        <div class="sidebar-content" id="workspace-list">
-            <!-- Dynamic workspace items inserted here -->
-        </div>
-        <div class="sidebar-footer">
-            <button id="add-workspace-btn" class="add-workspace-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="sidebar-top" style="padding: 1rem; padding-bottom: 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                <h2 style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0;">Menü</h2>
+                <button id="close-sidebar-btn" aria-label="Menüyü Kapat" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            
+            <button id="add-workspace-btn" class="chatgpt-new-btn" style="width:100%; display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1rem; border-radius:12px; border:1px solid rgba(255,255,255,0.1); background:var(--bg-card); color:var(--text-primary); cursor:pointer; font-weight:500; font-size:0.95rem; text-align:left; transition:all 0.2s;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                Yeni Alan Ekle
+                Yeni Liste
             </button>
-            <div class="backup-actions">
-                <button id="export-backup-btn" class="backup-btn" title="Verileri İndir">
+
+            <!-- Tools / Nav Links (Empty for now) -->
+            <div style="margin-top: 1rem; display:flex; flex-direction:column; gap:0.2rem;">
+            </div>
+        </div>
+
+        <div class="sidebar-middle" style="flex:1; overflow-y:auto; padding: 1rem; padding-top: 1.5rem;">
+            <h3 class="sidebar-section-title" style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; letter-spacing: 0px; margin-bottom: 0.75rem; padding-left: 0.5rem;">YAKIN ZAMANDAKİLER</h3>
+            <div class="sidebar-content" id="workspace-list" style="padding: 0;">
+                <!-- Dynamic workspace items inserted here -->
+            </div>
+        </div>
+
+        <div class="sidebar-footer" style="padding: 1rem; border-top: 1px solid var(--border-color);">
+            <div class="backup-actions" style="display:flex; gap: 0.5rem; width: 100%;">
+                <button id="export-backup-btn" class="backup-btn" title="Dışa Aktar" style="flex:1; display:flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.75rem; background:transparent; border:1px solid var(--border-color); border-radius:8px; color:var(--text-secondary); cursor:pointer; transition:all 0.2s;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    Yedekle
                 </button>
-                <label for="import-backup-file" class="backup-btn" title="Yedek Yükle">
+                <label for="import-backup-file" class="backup-btn" title="İçe Aktar" style="flex:1; display:flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.75rem; background:transparent; border:1px solid var(--border-color); border-radius:8px; color:var(--text-secondary); cursor:pointer; transition:all 0.2s;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="17 8 12 3 7 8"></polyline>
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
-                    Geri Yükle
                 </label>
                 <input type="file" id="import-backup-file" accept=".json" style="display:none">
             </div>
@@ -67,37 +77,39 @@
             </button>
             <div class="title-text">
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <h1 id="workspace-title-display">Görev Panosu <span class="badge" id="total-task-count">0</span></h1>
-                    <button id="edit-workspace-btn" class="icon-btn edit-workspace-btn" aria-label="Çalışma Alanı İsmini Düzenle" title="Alanı Yeniden Adlandır" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 0.25rem; transition: color 0.2s ease;">
+                    <h1 id="workspace-title-display">Görev Listem <span class="badge" id="total-task-count">0</span></h1>
+                    <button id="edit-workspace-btn" class="icon-btn edit-workspace-btn" aria-label="Proje İsmini Düzenle" title="Projeyi Yeniden Adlandır" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 0.25rem; transition: color 0.2s ease;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                     </button>
                 </div>
-                <p>Günün, haftanın veya projelerin için sonsuz sütunlar oluştur.</p>
+                <p id="workspace-description-display">Günün, haftanın veya hedeflerinin için sonsuz listeler oluştur.</p>
             </div>
+            <button id="pomo-toggle-btn" class="menu-btn" aria-label="Pomodoro" title="Pomodoro Sayacı" style="margin-left: auto; gap: 0.5rem; padding: 0.5rem 0.75rem;">
+                🍅 <span style="font-size: 0.85rem; font-weight: 500;">Pomodoro</span>
+            </button>
         </div>
         
-        <div class="header-actions">
+        <div class="header-actions" id="header-actions">
             <!-- Search Bar -->
             <div class="search-container">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="search-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" id="board-search" placeholder="Pano Arayın..." autocomplete="off">
+                <input type="text" id="board-search" placeholder="Listelerde Ara..." autocomplete="off">
             </div>
 
-            <button id="add-board-btn" class="primary-btn">
+            <button id="add-board-btn" class="secondary-btn" title="Yeni Liste Ekle" aria-label="Yeni Liste Ekle">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                Yeni Sütun Ekle
             </button>
 
-            <button id="ws-settings-btn" class="secondary-btn" title="Alan Ayarları">
+            <button id="ws-settings-btn" class="secondary-btn" title="Proje Ayarları">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="3"></circle>
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -109,6 +121,104 @@
     <main class="board-container" id="board-container">
         <!-- Boards will be generated here by JavaScript -->
     </main>
+
+    <!-- Right Sidebar for Pomodoro -->
+    <aside id="pomodoro-sidebar" class="pomodoro-sidebar hidden">
+        <div class="pomodoro-sidebar-header">
+            <div style="display:flex; align-items:center; gap: 0.5rem; font-size: 1.1rem; font-weight: 600;">
+                <span>🍅</span> Pomodoro
+            </div>
+            <div style="display:flex; align-items:center; gap: 0.5rem;">
+                <button id="pomo-full-reset-btn" aria-label="Tümünü Sıfırla" title="Tümünü Sıfırla" style="background:none; border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); cursor:pointer; padding: 0.3rem 0.6rem; font-size: 0.75rem; display:flex; align-items:center; gap:0.3rem; transition: all 0.2s;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+                    Sıfırla
+                </button>
+                <button id="close-pomodoro-btn" aria-label="Kapat" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="13 17 18 12 13 7"></polyline>
+                        <polyline points="6 17 11 12 6 7"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="pomo-sidebar-scroll">
+            <div class="pomo-modes-sidebar">
+                <button class="pomo-mode-btn active" data-mode="work">Odaklan</button>
+                <button class="pomo-mode-btn" data-mode="break">Dinlen</button>
+            </div>
+
+            <div class="pomo-circle-container">
+                <svg class="pomo-progress-ring" width="220" height="220">
+                    <circle class="pomo-ring-bg" stroke="var(--bg-hover)" stroke-width="6" fill="transparent" r="100" cx="110" cy="110"/>
+                    <circle id="pomo-ring-progress" class="pomo-ring-progress" stroke="var(--accent)" stroke-width="6" fill="transparent" r="100" cx="110" cy="110" stroke-linecap="round"/>
+                </svg>
+                <div class="pomo-timer-overlay">
+                    <span id="pomo-status-icon" style="font-size: 1.5rem; margin-bottom: -5px;">🎯</span>
+                    <div id="pomo-timer-display" class="pomo-timer-display">25:00</div>
+                    <div id="pomo-timer-label" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">Odaklanma zamanı</div>
+                </div>
+            </div>
+
+            <div class="pomo-controls-circles">
+                <button id="pomo-start-btn" class="pomo-circle-btn active" title="Başlat/Durdur">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button id="pomo-skip-btn" class="pomo-circle-btn" title="Atla">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                </button>
+                <button id="pomo-reset-btn" class="pomo-circle-btn" title="Sayacı Sıfırla">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+                </button>
+            </div>
+
+            <!-- Progress Graphic -->
+            <div class="pomo-graphic-section">
+                <div class="pomo-graphic-header">
+                    <span id="pomo-round-text">1 / 4</span>
+                </div>
+                <div id="pomo-dots-container" class="pomo-dots-container">
+                    <!-- Dots generated dynamic here -->
+                </div>
+            </div>
+
+            <!-- Quick Settings Section -->
+            <div class="pomo-quick-settings">
+                <h4 class="settings-title">Hızlı Ayarlar</h4>
+                <div class="pomo-setting-row">
+                    <label>Odak Süresi</label>
+                    <select id="pomo-work-duration">
+                        <option value="15">15 dk</option>
+                        <option value="20">20 dk</option>
+                        <option value="25" selected>25 dk</option>
+                        <option value="30">30 dk</option>
+                        <option value="45">45 dk</option>
+                        <option value="60">60 dk</option>
+                    </select>
+                </div>
+                <div class="pomo-setting-row">
+                    <label>Mola Süresi</label>
+                    <select id="pomo-break-duration">
+                        <option value="5" selected>5 dk</option>
+                        <option value="10">10 dk</option>
+                        <option value="15">15 dk</option>
+                        <option value="20">20 dk</option>
+                    </select>
+                </div>
+                <div class="pomo-setting-row">
+                    <label>Hedef Tur</label>
+                    <input type="number" id="pomo-target-rounds" value="4" min="1" max="10">
+                </div>
+                <div class="pomo-setting-row">
+                    <label>Ses Bildirimi</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="pomo-sound-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </aside>
 
     <!-- Custom Confirm Modal -->
     <div id="confirm-modal" class="confirm-modal hidden">
@@ -126,14 +236,17 @@
     <div id="settings-modal" class="confirm-modal hidden">
         <div class="confirm-box settings-box">
             <div class="settings-header">
-                <h3>Alan Ayarları</h3>
+                <h3>Proje Ayarları</h3>
                 <button id="close-settings-btn" class="close-popup-btn">✕</button>
             </div>
             
-            <div class="setting-item">
-                <div class="setting-info">
-                    <h4>Saat Girme (Zaman Çizelgesi)</h4>
-                    <p>Görevlere saat eklenebilmesini açar/kapatır.</p>
+            <div style="margin-bottom: 1.5rem;">
+                <h4 style="margin-bottom: 1rem; color: var(--accent); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Görev ve Görünüm</h4>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h4>Zaman Çizelgesi</h4>
+                    <p>Görevlere saat ekleme özelliğini aktif eder.</p>
                 </div>
                 <label class="toggle-switch">
                     <input type="checkbox" id="setting-time-toggle">
@@ -141,10 +254,10 @@
                 </label>
             </div>
 
-            <div class="setting-item">
+                <div class="setting-item">
                 <div class="setting-info">
-                    <h4>Onay Kutucukları</h4>
-                    <p>Görevlerin tik atılabilmesini açar/kapatır.</p>
+                    <h4>Tamamlanma Kutuları</h4>
+                    <p>Görevlerin yanına işaretleme kutucuğu (tik) ekler.</p>
                 </div>
                 <label class="toggle-switch">
                     <input type="checkbox" id="setting-check-toggle">
@@ -154,13 +267,63 @@
 
             <div class="setting-item">
                 <div class="setting-info">
-                    <h4>İlerleme Çubuğu (Lazer)</h4>
-                    <p>Panoların altındaki yüzde sayacını gösterir.</p>
+                    <h4>İlerleme Çubuğu</h4>
+                    <p>Listelerin tamamlanma yüzdesini gösterir.</p>
                 </div>
                 <label class="toggle-switch">
                     <input type="checkbox" id="setting-progress-toggle">
                     <span class="slider"></span>
                 </label>
+            </div>
+            </div>
+
+            <div>
+                <h4 style="margin-bottom: 1rem; color: var(--accent); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Hatırlatıcı Ayarları</h4>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h4>Sesli Hatırlatıcı</h4>
+                    <p>Vakti gelen görevler için bildirim ve alarm çalar.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="setting-alarm-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-item" id="setting-alarm-options" style="flex-direction: column; align-items: flex-start; gap: 1rem; display: none;">
+                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                    <span style="font-size: 0.9rem; color: var(--text-secondary);">Önceden Uyar (Dakika)</span>
+                    <input type="number" id="setting-alarm-offset" min="0" max="1440" value="5" class="todo-input" style="width: 80px; padding: 0.4rem; text-align: center; border-radius: 6px;">
+                </div>
+                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                    <span style="font-size: 0.9rem; color: var(--text-secondary);">Erteleme Süresi (Dakika)</span>
+                    <input type="number" id="setting-snooze-duration" min="1" max="1440" value="5" class="todo-input" style="width: 80px; padding: 0.4rem; text-align: center; border-radius: 6px;">
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alarm Modal -->
+    <div id="alarm-modal" class="confirm-modal hidden">
+        <div class="confirm-box alarm-box" style="border: 2px solid var(--accent); box-shadow: 0 0 40px var(--accent-glow);">
+            <div style="display:flex; justify-content:center; margin-bottom:1rem; color:var(--accent); animation: pulse 2s infinite;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="13" r="8"></circle>
+                    <path d="M12 9v4l2 2"></path>
+                    <path d="M5 3L2 6"></path>
+                    <path d="M22 6l-3-3"></path>
+                    <path d="M6.38 18.7L4 21"></path>
+                    <path d="M17.64 18.67L20 21"></path>
+                </svg>
+            </div>
+            <h3 id="alarm-title" style="margin-bottom: 0.5rem; text-align: center;">Zamanı Geldi!</h3>
+            <p id="alarm-task-name" style="text-align: center; color: var(--text-primary); font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">Görev Adı</p>
+            <p id="alarm-task-time" style="text-align: center; color: var(--text-secondary); margin-bottom: 1.5rem;">15:30</p>
+            <div class="confirm-actions" style="flex-direction: column; gap: 0.5rem;">
+                <button id="alarm-complete-btn" class="primary-btn" style="width: 100%; justify-content: center; background-color: var(--accent);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;"><polyline points="20 6 9 17 4 12"></polyline></svg> Tamam</button>
+                <button id="alarm-snooze-btn" class="secondary-btn" style="width: 100%; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Ertele (<span id="alarm-snooze-mins">5</span> dk)</button>
             </div>
         </div>
     </div>
@@ -184,7 +347,7 @@
         <div class="board" data-id="" draggable="false">
             <div class="board-header">
                 <!-- Drag Handle Icon -->
-                <div class="drag-handle" title="Panoyu Taşı" draggable="true">
+                <div class="drag-handle" title="Listeyi Taşı" draggable="true">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="9" cy="12" r="1"></circle>
                         <circle cx="9" cy="5" r="1"></circle>
@@ -194,9 +357,9 @@
                         <circle cx="15" cy="19" r="1"></circle>
                     </svg>
                 </div>
-                <h2 class="board-title" contenteditable="true" spellcheck="false" draggable="false">Yeni Sütun</h2>
+                <h2 class="board-title" contenteditable="true" spellcheck="false" draggable="false">Yeni Liste</h2>
                 <div class="board-header-actions" style="display:flex; gap:5px;">
-                    <button class="delete-board-btn" title="Sütunu Sil">
+                    <button class="delete-board-btn" title="Listeyi Sil">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -206,13 +369,13 @@
             </div>
             
             <div class="board-filters">
-                <button class="board-filter-btn active" data-filter="all">Tümü</button>
-                <button class="board-filter-btn" data-filter="pending">Bekleyen</button>
-                <button class="board-filter-btn" data-filter="completed">Biten</button>
+                <button class="board-filter-btn active" data-filter="all">Hepsi</button>
+                <button class="board-filter-btn" data-filter="pending">Yapılacak</button>
+                <button class="board-filter-btn" data-filter="completed">Bitenler</button>
             </div>
 
             <!-- V4 Progress Bar -->
-            <div class="progress-container" title="Pano İlerlemesi">
+            <div class="progress-container" title="Durum">
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: 0%;"></div>
                 </div>
@@ -222,7 +385,7 @@
             <form class="task-form">
                 <div class="input-group">
                     <input type="time" class="todo-time time-picker" required>
-                    <input type="text" class="todo-input" placeholder="Görev..." autocomplete="off" required>
+                    <input type="text" class="todo-input" placeholder="Görev Ekle..." autocomplete="off" required>
                     <button type="submit" class="add-task-btn" aria-label="Ekle">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
