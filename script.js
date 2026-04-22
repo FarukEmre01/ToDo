@@ -61,6 +61,44 @@ document.addEventListener('DOMContentLoaded', () => {
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
             osc.start(audioCtx.currentTime);
             osc.stop(audioCtx.currentTime + 0.15);
+        } else if(type === 'beep') {
+            // Klasik bip-bip: 1000Hz sine, kısa ve net
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.02);
+            gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime + 0.12);
+            gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.15);
+        }
+    }
+
+    // 5 saniyelik klasik bip-bip alarm dizisi
+    let pomoAlarmTimer = null;
+    function playPomoAlarm() {
+        stopPomoAlarm();
+        let elapsed = 0;
+        const interval = 500; // Her 500ms'de bir çift bip
+        function doBip() {
+            playSound('beep');
+            setTimeout(() => playSound('beep'), 150); // çift bip
+        }
+        doBip(); // ilk bip hemen
+        pomoAlarmTimer = setInterval(() => {
+            elapsed += interval;
+            if(elapsed >= 5000) {
+                stopPomoAlarm();
+                return;
+            }
+            doBip();
+        }, interval);
+    }
+
+    function stopPomoAlarm() {
+        if(pomoAlarmTimer) {
+            clearInterval(pomoAlarmTimer);
+            pomoAlarmTimer = null;
         }
     }
 
@@ -374,11 +412,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 pomoIsRunning = false;
                 updateStartBtnIcon(false);
                 
-                // Play completion sound 5 times
+                // Klasik bip-bip alarm sesi 5 saniye boyunca
                 if(pomoSoundToggle.checked) {
-                    for(let i = 0; i < 5; i++) {
-                        setTimeout(() => playSound('party'), i * 400);
-                    }
+                    playPomoAlarm();
                 }
                 showToast(pomoMode === 'work' ? 'Odaklanma bitti! Mola zamanı ☕' : 'Mola bitti! Odaklanma zamanı 🎯', 'success');
                 
