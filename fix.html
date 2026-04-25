@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>İkon Düzeltici</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 50px; }
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; background: #ef4444; color: white; border: none; border-radius: 8px; margin-top: 20px; }
+        canvas { border: 2px solid #333; margin-top: 20px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Tickoro İkon Düzeltici</h2>
+    <p>Telefonun beyaz kenar yapmasını engellemek için ikonun şeffaf köşelerini uygulama rengine boyar.</p>
+    
+    <div>
+        <canvas id="canvas512" width="512" height="512"></canvas>
+    </div>
+
+    <button onclick="fixAndDownload()">İkonları Düzelt ve İndir</button>
+
+    <script>
+        const bgColor = '#0f172a'; // Uygulamanın arka plan rengi
+
+        function drawFixedIcon(canvasId, src, size) {
+            return new Promise((resolve) => {
+                const canvas = document.getElementById(canvasId);
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.onload = () => {
+                    // 1. Arka planı tamamen boya
+                    ctx.fillStyle = bgColor;
+                    ctx.fillRect(0, 0, size, size);
+                    
+                    // 2. Senin şeffaf resmini üstüne çiz
+                    ctx.drawImage(img, 0, 0, size, size);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.src = src;
+            });
+        }
+
+        async function fixAndDownload() {
+            // İkonları çiz ve al
+            const dataUrl512 = await drawFixedIcon('canvas512', 'icons/icon-512.png', 512);
+            
+            // İndir 512
+            const link512 = document.createElement('a');
+            link512.download = 'icon-512.png';
+            link512.href = dataUrl512;
+            link512.click();
+
+            alert('Yeni icon-512.png dosyası indirildi! Lütfen bu dosyayı kopyalayıp icons klasöründeki eski dosyaların (icon-192.png ve icon-512.png) yerine yapıştır (isimlerini ayarlayarak) ve GitHub\'a pushla.');
+        }
+
+        // Sayfa açılınca önizlemeyi göster
+        drawFixedIcon('canvas512', 'icons/icon-512.png', 512);
+    </script>
+</body>
+</html>
