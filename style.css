@@ -45,6 +45,17 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    
+    /* Native App Feel Enhancements */
+    -webkit-tap-highlight-color: transparent; /* Remove blue tap highlight on mobile */
+    -webkit-touch-callout: none; /* Disable long-press popup menu */
+    user-select: none; /* Prevent text selection */
+}
+
+/* Allow text selection where needed */
+input, textarea, [contenteditable="true"] {
+    user-select: auto;
+    -webkit-user-select: auto;
 }
 
 /* Master Header */
