@@ -1735,3 +1735,574 @@ input:disabled + .slider:before {
     background: rgba(255,255,255,0.06) !important;
     color: var(--accent) !important;
 }
+
+/* === Tutorial / Onboarding Popup === */
+
+/* Sidebar shortcut button */
+.tutorial-sidebar-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.75rem;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.tutorial-sidebar-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.08);
+}
+
+/* Modal Overlay */
+.tutorial-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.35s ease;
+}
+
+.tutorial-modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tutorial-modal.hidden .tutorial-card {
+    transform: scale(0.92) translateY(20px);
+}
+
+.tutorial-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Card */
+.tutorial-card {
+    position: relative;
+    width: 520px;
+    max-width: 92vw;
+    max-height: 90vh;
+    background: rgba(20, 30, 50, 0.92);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.6),
+        0 0 80px rgba(139, 92, 246, 0.1),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Close X button */
+.tutorial-close-x {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 2;
+}
+
+.tutorial-close-x:hover {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Carousel */
+.tutorial-carousel {
+    overflow: hidden;
+    flex: 1;
+}
+
+.tutorial-slides {
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tutorial-slide {
+    min-width: 100%;
+    padding: 2.5rem 2.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+}
+
+.tutorial-slide-icon {
+    font-size: 3rem;
+    margin-bottom: 0.25rem;
+    animation: tutorialBounce 2s ease-in-out infinite;
+}
+
+@keyframes tutorialBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+.tutorial-slide h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.tutorial-slide-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 400px;
+    margin: 0.25rem 0 0;
+}
+
+.tutorial-slide-desc strong {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* Visual Sections */
+.tutorial-slide-visual {
+    margin-top: 1.25rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* --- Slide 1: Mini Boards --- */
+.tutorial-mini-boards {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.tutorial-mini-board {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 0.75rem;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.tmb-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.2rem;
+}
+
+.tmb-task {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), rgba(139,92,246,0.3));
+    animation: tmb-shimmer 2s ease-in-out infinite alternate;
+}
+
+.tmb-task.short {
+    width: 65%;
+}
+
+@keyframes tmb-shimmer {
+    0% { opacity: 0.4; }
+    100% { opacity: 0.9; }
+}
+
+/* --- Slide 2: Feature List --- */
+.tutorial-feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+    max-width: 280px;
+}
+
+.tutorial-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    transition: all 0.2s;
+}
+
+.tfi-icon {
+    font-size: 1.1rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* --- Slide 3: Color Demo --- */
+.tutorial-color-demo {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.tcd-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    animation: tcd-pulse 2.5s ease-in-out infinite;
+}
+
+.tcd-dot:nth-child(2) { animation-delay: 0.2s; }
+.tcd-dot:nth-child(3) { animation-delay: 0.4s; }
+.tcd-dot:nth-child(4) { animation-delay: 0.6s; }
+.tcd-dot:nth-child(5) { animation-delay: 0.8s; }
+.tcd-dot:nth-child(6) { animation-delay: 1s; }
+
+@keyframes tcd-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.tutorial-detail-preview {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.tdp-note, .tdp-sub {
+    padding: 0.4rem 0.8rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* --- Slide 4: Project List --- */
+.tutorial-project-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    width: 100%;
+    max-width: 220px;
+}
+
+.tpl-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.tpl-item.active {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: var(--accent);
+    color: var(--text-light);
+}
+
+.tpl-item.add {
+    border-style: dashed;
+    color: var(--text-muted);
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.tpl-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+}
+
+.tpl-item.active .tpl-dot {
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent-glow);
+}
+
+/* --- Slide 5: Pomodoro Preview --- */
+.tutorial-pomo-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.tpp-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px var(--accent-glow);
+    animation: tpp-glow 3s ease-in-out infinite;
+}
+
+@keyframes tpp-glow {
+    0%, 100% { box-shadow: 0 0 15px var(--accent-glow); }
+    50% { box-shadow: 0 0 30px var(--accent-glow), 0 0 60px rgba(139,92,246,0.15); }
+}
+
+.tpp-time {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.tpp-controls {
+    display: flex;
+    gap: 1rem;
+}
+
+.tpp-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* --- Slide 6: Settings Demo --- */
+.tutorial-settings-demo {
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.tsd-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.tsd-toggle {
+    width: 32px;
+    height: 18px;
+    border-radius: 9px;
+    background: rgba(255,255,255,0.1);
+    position: relative;
+    transition: background 0.3s;
+}
+
+.tsd-toggle::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    top: 2px;
+    left: 2px;
+    transition: all 0.3s;
+}
+
+.tsd-toggle.on {
+    background: var(--accent);
+}
+
+.tsd-toggle.on::after {
+    transform: translateX(14px);
+    background: white;
+    box-shadow: 0 0 6px rgba(255,255,255,0.5);
+}
+
+/* Navigation */
+.tutorial-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.75rem 2rem;
+}
+
+.tutorial-nav-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tutorial-nav-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.1);
+    border-color: var(--accent);
+}
+
+.tutorial-nav-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.tutorial-dots {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tutorial-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tutorial-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+    transform: scale(1.3);
+}
+
+.tutorial-dot:hover:not(.active) {
+    background: rgba(255,255,255,0.35);
+    transform: scale(1.15);
+}
+
+/* Footer */
+.tutorial-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.tutorial-dont-show {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.tutorial-dont-show:hover {
+    color: var(--text-secondary);
+}
+
+.tutorial-dont-show input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.tutorial-got-it-btn {
+    background: linear-gradient(135deg, var(--accent), #6d28d9);
+    color: white;
+    border: none;
+    padding: 0.65rem 1.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.tutorial-got-it-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--accent-glow), 0 0 30px rgba(139,92,246,0.2);
+}
+
+.tutorial-got-it-btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tutorial-slide {
+        padding: 2rem 1.5rem 1rem;
+    }
+
+    .tutorial-slide h2 {
+        font-size: 1.25rem;
+    }
+
+    .tutorial-slide-desc {
+        font-size: 0.85rem;
+    }
+
+    .tutorial-footer {
+        padding: 0.75rem 1.25rem 1.25rem;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .tutorial-got-it-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .tutorial-mini-boards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tutorial-mini-board {
+        width: 160px;
+    }
+}

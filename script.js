@@ -1730,4 +1730,145 @@ document.addEventListener('DOMContentLoaded', () => {
         div.textContent = str;
         return div.innerHTML;
     }
+
+    // --- Onboarding Tutorial System ---
+    const tutorialModal = document.getElementById('tutorial-modal');
+    const tutorialSlides = document.getElementById('tutorial-slides');
+    const tutorialDots = document.getElementById('tutorial-dots');
+    const tutorialPrev = document.getElementById('tutorial-prev');
+    const tutorialNext = document.getElementById('tutorial-next');
+    const tutorialGotIt = document.getElementById('tutorial-got-it');
+    const tutorialCloseX = document.getElementById('tutorial-close-x');
+    const tutorialDontShowCheck = document.getElementById('tutorial-dont-show-check');
+    const openTutorialBtn = document.getElementById('open-tutorial-btn');
+
+    let tutorialCurrentSlide = 0;
+    const tutorialSlideElements = tutorialSlides ? tutorialSlides.querySelectorAll('.tutorial-slide') : [];
+    const tutorialTotalSlides = tutorialSlideElements.length;
+
+    function tutorialInit() {
+        if (!tutorialModal || tutorialTotalSlides === 0) return;
+
+        // Build dot indicators
+        if (tutorialDots) {
+            tutorialDots.innerHTML = '';
+            for (let i = 0; i < tutorialTotalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = `tutorial-dot ${i === 0 ? 'active' : ''}`;
+                dot.dataset.index = i;
+                dot.addEventListener('click', () => tutorialGoTo(i));
+                tutorialDots.appendChild(dot);
+            }
+        }
+
+        tutorialUpdateNav();
+    }
+
+    function tutorialGoTo(index) {
+        if (index < 0 || index >= tutorialTotalSlides) return;
+        tutorialCurrentSlide = index;
+        
+        if (tutorialSlides) {
+            tutorialSlides.style.transform = `translateX(-${index * 100}%)`;
+        }
+
+        // Update dots
+        if (tutorialDots) {
+            tutorialDots.querySelectorAll('.tutorial-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        tutorialUpdateNav();
+    }
+
+    function tutorialUpdateNav() {
+        if (tutorialPrev) tutorialPrev.disabled = tutorialCurrentSlide === 0;
+        if (tutorialNext) tutorialNext.disabled = tutorialCurrentSlide === tutorialTotalSlides - 1;
+    }
+
+    function tutorialShow() {
+        if (!tutorialModal) return;
+        tutorialCurrentSlide = 0;
+        tutorialGoTo(0);
+        if (tutorialDontShowCheck) tutorialDontShowCheck.checked = false;
+        tutorialModal.classList.remove('hidden');
+    }
+
+    function tutorialHide() {
+        if (!tutorialModal) return;
+        tutorialModal.classList.add('hidden');
+
+        // Save preference if checkbox is checked
+        if (tutorialDontShowCheck && tutorialDontShowCheck.checked) {
+            localStorage.setItem('tutorialDismissed', 'true');
+        }
+    }
+
+    // Event Listeners
+    if (tutorialPrev) {
+        tutorialPrev.addEventListener('click', () => {
+            playSound('whoosh');
+            tutorialGoTo(tutorialCurrentSlide - 1);
+        });
+    }
+
+    if (tutorialNext) {
+        tutorialNext.addEventListener('click', () => {
+            playSound('whoosh');
+            tutorialGoTo(tutorialCurrentSlide + 1);
+        });
+    }
+
+    if (tutorialGotIt) {
+        tutorialGotIt.addEventListener('click', () => {
+            playSound('complete');
+            tutorialHide();
+        });
+    }
+
+    if (tutorialCloseX) {
+        tutorialCloseX.addEventListener('click', () => {
+            tutorialHide();
+        });
+    }
+
+    // Sidebar shortcut
+    if (openTutorialBtn) {
+        openTutorialBtn.addEventListener('click', () => {
+            toggleSidebar(false);
+            playSound('whoosh');
+            setTimeout(() => tutorialShow(), 200);
+        });
+    }
+
+    // Backdrop click to close
+    const tutorialBackdrop = tutorialModal ? tutorialModal.querySelector('.tutorial-backdrop') : null;
+    if (tutorialBackdrop) {
+        tutorialBackdrop.addEventListener('click', () => {
+            tutorialHide();
+        });
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (tutorialModal && !tutorialModal.classList.contains('hidden')) {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                tutorialGoTo(tutorialCurrentSlide + 1);
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                tutorialGoTo(tutorialCurrentSlide - 1);
+            } else if (e.key === 'Escape') {
+                tutorialHide();
+            }
+        }
+    });
+
+    // Initialize & auto-show on first visit
+    tutorialInit();
+    if (!localStorage.getItem('tutorialDismissed')) {
+        // Small delay for smooth entrance after page load
+        setTimeout(() => tutorialShow(), 500);
+    }
 });
