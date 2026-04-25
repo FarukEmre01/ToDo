@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tickoro-v1';
+const CACHE_NAME = 'tickoro-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -6,21 +6,20 @@ const ASSETS_TO_CACHE = [
   './script.js',
   './drag-drop-touch.js',
   './manifest.json',
-  './icons/icon.svg'
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
-// Kurulum (Install) aşaması - Dosyaları önbelleğe al
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Önbellek açıldı');
+      console.log('Önbellek açıldı v2');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
-// Etkinleşme (Activate) aşaması - Eski önbellekleri temizle
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -37,11 +36,9 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// İstek (Fetch) aşaması - İnternet yoksa cache'ten ver
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // Cache'te varsa onu döndür, yoksa internetten çek
       return response || fetch(event.request);
     })
   );
