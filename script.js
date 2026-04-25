@@ -1865,6 +1865,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Touch swipe support for mobile
+    if (tutorialModal) {
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const swipeThreshold = 50;
+
+        const tutorialCard = tutorialModal.querySelector('.tutorial-card');
+        if (tutorialCard) {
+            tutorialCard.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            tutorialCard.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const diff = touchStartX - touchEndX;
+                
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        // Swipe left → next slide
+                        tutorialGoTo(tutorialCurrentSlide + 1);
+                    } else {
+                        // Swipe right → prev slide
+                        tutorialGoTo(tutorialCurrentSlide - 1);
+                    }
+                }
+            }, { passive: true });
+        }
+    }
+
     // Initialize & auto-show on first visit
     tutorialInit();
     if (!localStorage.getItem('tutorialDismissed')) {

@@ -2274,35 +2274,231 @@ input:disabled + .slider:before {
 
 /* Responsive */
 @media (max-width: 768px) {
+    .tutorial-card {
+        width: 95vw;
+        max-width: 95vw;
+        max-height: 85vh;
+        border-radius: 16px;
+    }
+
+    .tutorial-carousel {
+        flex: 1;
+        min-height: 0; /* Prevent flex overflow */
+        overflow: hidden;
+    }
+
     .tutorial-slide {
-        padding: 2rem 1.5rem 1rem;
+        padding: 1.5rem 1.25rem 1rem;
+        gap: 0.35rem;
+    }
+
+    .tutorial-slide-icon {
+        font-size: 2.25rem;
+        margin-bottom: 0.1rem;
     }
 
     .tutorial-slide h2 {
-        font-size: 1.25rem;
+        font-size: 1.15rem;
     }
 
     .tutorial-slide-desc {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+        line-height: 1.5;
     }
 
-    .tutorial-footer {
-        padding: 0.75rem 1.25rem 1.25rem;
-        flex-direction: column;
+    .tutorial-slide-visual {
+        margin-top: 0.75rem;
+        gap: 0.6rem;
+    }
+
+    /* Slide 1: Mini boards side by side on mobile */
+    .tutorial-mini-boards {
+        flex-direction: row;
+        gap: 0.6rem;
+    }
+
+    .tutorial-mini-board {
+        width: 100px;
+        padding: 0.6rem;
+        gap: 0.3rem;
+    }
+
+    .tmb-title {
+        font-size: 0.6rem;
+    }
+
+    .tmb-task {
+        height: 6px;
+    }
+
+    /* Slide 2: Feature list */
+    .tutorial-feature-list {
+        max-width: 100%;
+        gap: 0.4rem;
+    }
+
+    .tutorial-feature-item {
+        padding: 0.45rem 0.6rem;
+        font-size: 0.78rem;
+        gap: 0.5rem;
+    }
+
+    .tfi-icon {
+        font-size: 0.95rem;
+        min-width: 20px;
+    }
+
+    /* Slide 3: Color dots */
+    .tutorial-color-demo {
+        gap: 0.5rem;
+    }
+
+    .tcd-dot {
+        width: 16px;
+        height: 16px;
+    }
+
+    .tutorial-detail-preview {
         gap: 0.75rem;
+    }
+
+    .tdp-note, .tdp-sub {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.72rem;
+    }
+
+    /* Slide 4: Project list */
+    .tutorial-project-list {
+        max-width: 180px;
+        gap: 0.3rem;
+    }
+
+    .tpl-item {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.78rem;
+        gap: 0.4rem;
+    }
+
+    .tpl-dot {
+        width: 6px;
+        height: 6px;
+    }
+
+    /* Slide 5: Pomodoro */
+    .tpp-circle {
+        width: 80px;
+        height: 80px;
+    }
+
+    .tpp-time {
+        font-size: 1.1rem;
+    }
+
+    .tpp-controls {
+        gap: 0.75rem;
+    }
+
+    .tpp-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+    }
+
+    /* Slide 6: Settings */
+    .tutorial-settings-demo {
+        max-width: 100%;
+        gap: 0.3rem;
+    }
+
+    .tsd-row {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.72rem;
+    }
+
+    .tsd-toggle {
+        width: 28px;
+        height: 16px;
+    }
+
+    .tsd-toggle::after {
+        width: 12px;
+        height: 12px;
+    }
+
+    .tsd-toggle.on::after {
+        transform: translateX(12px);
+    }
+
+    /* Navigation */
+    .tutorial-nav {
+        padding: 0.5rem 1.25rem;
+        gap: 0.75rem;
+    }
+
+    .tutorial-nav-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .tutorial-dots {
+        gap: 0.4rem;
+    }
+
+    .tutorial-dot {
+        width: 7px;
+        height: 7px;
+    }
+
+    /* Footer */
+    .tutorial-footer {
+        padding: 0.75rem 1.25rem 1rem;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .tutorial-dont-show {
+        font-size: 0.75rem;
     }
 
     .tutorial-got-it-btn {
         width: 100%;
         text-align: center;
+        padding: 0.6rem 1.25rem;
+        font-size: 0.9rem;
     }
 
-    .tutorial-mini-boards {
-        flex-direction: column;
-        align-items: center;
+    /* Close X */
+    .tutorial-close-x {
+        top: 0.75rem;
+        right: 0.75rem;
+        padding: 0.3rem;
+    }
+}
+
+/* Extra small phones */
+@media (max-width: 380px) {
+    .tutorial-card {
+        max-height: 88vh;
+    }
+
+    .tutorial-slide {
+        padding: 1.25rem 1rem 0.75rem;
+    }
+
+    .tutorial-slide-icon {
+        font-size: 2rem;
+    }
+
+    .tutorial-slide h2 {
+        font-size: 1.05rem;
+    }
+
+    .tutorial-slide-desc {
+        font-size: 0.75rem;
     }
 
     .tutorial-mini-board {
-        width: 160px;
+        width: 85px;
     }
 }
+
