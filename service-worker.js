@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tickoro-v2';
+const CACHE_NAME = 'tickoro-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -6,8 +6,7 @@ const ASSETS_TO_CACHE = [
   './script.js',
   './drag-drop-touch.js',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon.jpg'
 ];
 
 self.addEventListener('install', (event) => {
