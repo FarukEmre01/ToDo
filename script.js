@@ -483,6 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function pomoStartTimer() {
+        requestNotificationPermission(); // Ask for permission when user starts Pomodoro
         if(pomoIsRunning) return;
         pomoIsRunning = true;
         updateStartBtnIcon(true);
