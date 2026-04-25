@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tickoro-v5';
+const CACHE_NAME = 'tickoro-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
