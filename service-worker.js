@@ -43,3 +43,32 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// Bildirim etkileşimlerini (buton tıklamalarını) dinle
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  const action = event.action;
+  const data = event.notification.data;
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) {
+          // Açık bir sekme varsa ona mesaj gönder
+          client.postMessage({
+            action: action || 'click',
+            payload: data
+          });
+          // Bildirime basıldığında sekmeyi öne getir
+          if (!action || action === 'click') client.focus();
+          return;
+        }
+      }
+      // Hiç açık sekme yoksa uygulamayı aç
+      if (self.clients.openWindow && (!action || action === 'click')) {
+        return self.clients.openWindow('./');
+      }
+    })
+  );
+});

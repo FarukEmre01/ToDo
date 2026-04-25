@@ -5,6 +5,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
 
+    // --- PWA Notification Setup ---
+    function requestNotificationPermission() {
+        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+            Notification.requestPermission();
+        }
+    }
+
+    function sendSWNotification(title, body, actions = [], data = {}) {
+        if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification(title, {
+                    body: body,
+                    icon: 'icons/icon-192.png',
+                    vibrate: [200, 100, 200],
+                    actions: actions,
+                    data: data,
+                    requireInteraction: actions.length > 0
+                });
+            });
+        }
+    }
+
+    // SW'den gelen Ertele/Anladım mesajlarını dinle
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', event => {
+            const data = event.data;
+            if (data.action === 'snooze' && data.payload && data.payload.taskId) {
+                const ws = getActiveWorkspace();
+                const board = ws.boards.find(b => b.id === data.payload.boardId);
+                if (board) {
+                    const task = board.tasks.find(t => t.id === data.payload.taskId);
+                    if (task && task.time) {
+                        const [h, m] = task.time.split(':').map(Number);
+                        let newTime = new Date();
+                        newTime.setHours(h);
+                        newTime.setMinutes(m + (ws.settings.snoozeDuration || 10));
+                        task.time = `${newTime.getHours().toString().padStart(2, '0')}:${newTime.getMinutes().toString().padStart(2, '0')}`;
+                        task.alarmTriggered = false;
+                        saveWorkspaces();
+                        reRenderBoardTasks(board.id);
+                        stopAlarmSound();
+                        const alarmModal = document.getElementById('alarm-modal');
+                        if (alarmModal) alarmModal.classList.add('hidden');
+                        showToast(`Görev ${ws.settings.snoozeDuration || 10} dakika ertelendi.`, 'success');
+                    }
+                }
+            } else if (data.action === 'gotit') {
+                stopAlarmSound();
+                const alarmModal = document.getElementById('alarm-modal');
+                if (alarmModal) alarmModal.classList.add('hidden');
+            }
+        });
+    }
+
     function playSound(type) {
         if(audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
@@ -445,7 +499,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(pomoSoundToggle.checked) {
                     playPomoAlarm();
                 }
-                showToast(pomoMode === 'work' ? 'Odaklanma bitti! Mola zamanı ☕' : 'Mola bitti! Odaklanma zamanı 🎯', 'success');
+                
+                const msg = pomoMode === 'work' ? 'Odaklanma bitti! Mola zamanı ☕' : 'Mola bitti! Odaklanma zamanı 🎯';
+                const notifTitle = pomoMode === 'work' ? 'Dinlenme Vakti' : 'Odaklanma Vakti';
+                
+                showToast(msg, 'success');
+                sendSWNotification(notifTitle, msg);
                 
                 pomoNextMode(true); // true = autoStart
             }
@@ -1649,12 +1708,10 @@ document.addEventListener('DOMContentLoaded', () => {
             activeAlarmTask = null;
         }, 60000);
         
-        if (window.Notification && Notification.permission === 'granted') {
-            const notif = new Notification('Zamanı Geldi!', {
-                body: `${task.text} (${task.time})`
-            });
-            notif.onclick = () => window.focus();
-        }
+        sendSWNotification("Yeni Göreve Hazırlan!", `${task.text} (${task.time})`, [
+            { action: 'snooze', title: 'Ertele (10 dk)' },
+            { action: 'gotit', title: 'Anladım' }
+        ], { boardId, taskId: task.id });
 
         activeAlarmTask = task;
         activeAlarmBoardId = boardId;
